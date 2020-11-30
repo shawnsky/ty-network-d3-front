@@ -50,7 +50,7 @@ export default {
         // { sid: 3, tid: 8 },
         // { sid: 7, tid: 9 },
       ],
-      nodeSize: 20,
+      nodeSize: 25,
       canvas: false,
       i: 0,
     };
@@ -64,7 +64,7 @@ export default {
   computed: {
     options() {
       return {
-        force: 500,
+        force: 1000,
         size: { w: 1200, h: 1200 },
         nodeSize: this.nodeSize,
         nodeLabels: true,
@@ -119,7 +119,7 @@ export default {
         redata.nodes.forEach(e => {
           this.nodes.push({
             id: e.id,
-            name: e.id,
+            name: e.value + '',
             _color: e.active == 1 ? 'black' : ''
           })
           this.nidIndexMap[e.id] = index;
@@ -129,7 +129,9 @@ export default {
         this.hasStruct = true;
       } else {
         redata.nodes.forEach(e => {
-        this.nodes[this.nidIndexMap[e.id]]._color = e.active == 1 ? 'black' : ''
+          console.log(e)
+          this.nodes[this.nidIndexMap[e.id]]._color = e.active == 1 ? 'black' : ''
+          this.nodes[this.nidIndexMap[e.id]].name = e.value + ''
         })
       }
 
