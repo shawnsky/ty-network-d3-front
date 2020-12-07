@@ -2,25 +2,59 @@
 <template>
   <div id="app">
     <d3-network :net-nodes="nodes" :net-links="links" :options="options" />
-    <button @click="add()"></button>
+    <button @click="start()">Start</button>
+    <button @click="pause()">Pause</button>
+
+    <!-- <my-line-chart id="line" :dataset="data1"></my-line-chart>
+
+    <button @click="append()">Append</button> -->
   </div>
-  
 </template>
 
 <script>
 import D3Network from "vue-d3-network";
+// import MyLineChart from "./components/MyLineChart2";
+// import LineChart from "./components/LineChart";
 const nidIndexMap = new Map();
-const colorMap = new Map([
-
-]);
+const colorMap = new Map([]);
 
 export default {
   name: "App",
   components: {
     D3Network,
+    // MyLineChart,
   },
   data() {
     return {
+      data1: [
+        {
+          name: "哈尔滨",
+          value: [
+            { key: "2015-1-1", value: 10 },
+            { key: "2015-1-2", value: 12 },
+            { key: "2015-1-3", value: 13 },
+            { key: "2015-1-17", value: 17 },
+          ],
+        },
+        {
+          name: "海南",
+          value: [
+            { key: "2015-1-1", value: 9 },
+            { key: "2015-1-2", value: 48 },
+            { key: "2015-1-3", value: 5 },
+            { key: "2015-1-17", value: 49 },
+          ],
+        },
+        {
+          name: "天津",
+          value: [
+            { key: "2015-1-2", value: 30 },
+            { key: "2015-1-3", value: 1 },
+            { key: "2015-1-4", value: 32 },
+            { key: "2015-1-5", value: 10 },
+          ],
+        },
+      ],
       hasStruct: false,
       nidIndexMap: nidIndexMap,
       nodes: [
@@ -75,13 +109,26 @@ export default {
   },
   methods: {
     rainbow(min, max, val) {
-      var minHue = 240, maxHue=0;
-      var curPercent = (val - min) / (max-min);
-      var colString = "hsl(" + ((curPercent * (maxHue-minHue) ) + minHue) + ",100%,50%)";
+      var minHue = 240,
+        maxHue = 0;
+      var curPercent = (val - min) / (max - min);
+      var colString =
+        "hsl(" + (curPercent * (maxHue - minHue) + minHue) + ",100%,50%)";
       return colString;
     },
+    append() {
+      this.data1.push({
+          name: "beijing",
+          value: [
+            { key: "2015-1-1", value: 11 },
+            { key: "2015-1-2", value: 1 },
+            { key: "2015-1-3", value: 20 },
+            { key: "2015-1-17", value: 16 },
+          ],
+        },)
+    },
     getColor(val) {
-      var c = Math.round(Math.abs(val-0.5)*510)
+      var c = Math.round(Math.abs(val - 0.5) * 510);
       return `rgb(${c},${c},${c})`;
       // if (val > 0 && val < 0.5) {
       //   return `rgb(${c},${c},${c})`;
@@ -100,9 +147,18 @@ export default {
       this.websock.onerror = this.websocketonerror;
       this.websock.onclose = this.websocketclose;
     },
+    start() {
+      let actions = { BrowserMessage: "start" };
+      this.websocketsend(JSON.stringify(actions));
+    },
+    pause() {
+      let actions = { BrowserMessage: "pause" };
+      this.websocketsend(JSON.stringify(actions));
+      console.log("pause");
+    },
     websocketonopen() {
       //连接建立之后执行send方法发送数据
-      let actions = { event: "register" };
+      let actions = { BrowserMessage: "register" };
       this.websocketsend(JSON.stringify(actions));
     },
     websocketonerror() {
@@ -115,26 +171,26 @@ export default {
 
       if (!this.hasStruct) {
         var index = 0;
-        this.nodes = []
-        redata.nodes.forEach(e => {
+        this.nodes = [];
+        redata.nodes.forEach((e) => {
           this.nodes.push({
             id: e.id,
-            name: e.value + '',
-            _color: e.active == 1 ? 'black' : ''
-          })
+            name: e.value + "",
+            _color: e.active == 1 ? "black" : "",
+          });
           this.nidIndexMap[e.id] = index;
           index += 1;
-        })
+        });
         this.links = redata.edges;
         this.hasStruct = true;
       } else {
-        redata.nodes.forEach(e => {
-          console.log(e)
-          this.nodes[this.nidIndexMap[e.id]]._color = e.active == 1 ? 'black' : ''
-          this.nodes[this.nidIndexMap[e.id]].name = e.value + ''
-        })
+        redata.nodes.forEach((e) => {
+          // console.log(e)
+          this.nodes[this.nidIndexMap[e.id]]._color =
+            e.active == 1 ? "black" : "";
+          this.nodes[this.nidIndexMap[e.id]].name = e.value + "";
+        });
       }
-
     },
     websocketsend(Data) {
       //数据发送
